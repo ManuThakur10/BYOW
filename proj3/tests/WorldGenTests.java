@@ -13,11 +13,17 @@ public class WorldGenTests {
         TERenderer ter = new TERenderer();
         ter.initialize(tiles.length, tiles[0].length);
         ter.renderFrame(tiles);
-        StdDraw.pause(5000); // pause for 5 seconds so you can see the output
+//        StdDraw.pause(5000); // pause for 5 seconds so you can see the output
     }
 
     @Test
     public void basicInteractivityTest() {
+        TETile[][] tiles = AutograderBuddy.getWorldFromInput("n5197880843569031643s");
+
+        TERenderer ter = new TERenderer();
+        ter.initialize(tiles.length, tiles[0].length);
+        ter.renderFrame(tiles);
+        StdDraw.pause(5000);
         // TODO: write a test that uses an input like "n123swasdwasd"
     }
 

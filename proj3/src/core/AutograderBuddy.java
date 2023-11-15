@@ -3,7 +3,12 @@ package core;
 import tileengine.TETile;
 import tileengine.Tileset;
 
+import java.util.Random;
+
 public class AutograderBuddy {
+    private static final int SIXTY = 60;
+    private static final int THIRTY = 30;
+
 
     /**
      * Simulates a game, but doesn't render anything or call any StdDraw
@@ -18,9 +23,24 @@ public class AutograderBuddy {
      * @return the 2D TETile[][] representing the state of the world
      */
     public static TETile[][] getWorldFromInput(String input) {
-
-        throw new RuntimeException("Please fill out AutograderBuddy!");
-
+        Random r = new Random();
+        long seedLong;
+        String stringBuild = "";
+        char[] parsedString = input.toCharArray();
+        if (parsedString[0] == 'n' || parsedString[0] == 'N') { //Single quotes for chars, double for strings!
+            int index = 1;
+            while (index < parsedString.length && (parsedString[index] != 's' && parsedString[index] != 'S')) {
+                stringBuild += parsedString[index];
+                index++;
+            }
+        }
+        if (stringBuild.isBlank()) {
+            seedLong = r.nextLong();
+        } else {
+            seedLong = Long.parseLong(stringBuild);
+        }
+        World ourWorld = new World(SIXTY, THIRTY, seedLong);
+        return ourWorld.getTiles();
     }
 
 
@@ -32,6 +52,7 @@ public class AutograderBuddy {
     public static boolean isGroundTile(TETile t) {
         return t.character() == Tileset.FLOOR.character()
                 || t.character() == Tileset.AVATAR.character()
+                || t.character() == Tileset.GRASS.character()
                 || t.character() == Tileset.FLOWER.character();
     }
 

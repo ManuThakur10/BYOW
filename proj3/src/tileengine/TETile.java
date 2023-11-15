@@ -27,6 +27,7 @@ public class TETile {
     private final Color backgroundColor;
     private final String description;
     private final String filepath;
+    private boolean hallwayAdjacentToGrass;
 
     /**
      * Full constructor for TETile objects.
@@ -43,6 +44,8 @@ public class TETile {
         this.backgroundColor = backgroundColor;
         this.description = description;
         this.filepath = filepath;
+        this.hallwayAdjacentToGrass = false;
+
     }
 
     /**
@@ -59,6 +62,8 @@ public class TETile {
         this.backgroundColor = backgroundColor;
         this.description = description;
         this.filepath = null;
+        this.hallwayAdjacentToGrass = false;
+
     }
 
     /**
@@ -68,9 +73,17 @@ public class TETile {
      */
     public TETile(TETile t, Color textColor) {
         this(t.character, textColor, t.backgroundColor, t.description, t.filepath);
+        this.hallwayAdjacentToGrass = false;
+
     }
 
+    public void setHallwayAdjacentToGrassTrue() {
+         this.hallwayAdjacentToGrass = true;
+    }
 
+    public boolean getHallwayAdjacentToGrass() {
+        return this.hallwayAdjacentToGrass;
+    }
     /**
      * Draws the tile to the screen at location x, y. If a valid filepath is provided,
      * we draw the image located at that filepath to the screen. Otherwise, we fall
