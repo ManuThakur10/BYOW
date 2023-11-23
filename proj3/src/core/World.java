@@ -3,15 +3,19 @@ package core;
 import edu.princeton.cs.algs4.Edge;
 import edu.princeton.cs.algs4.EdgeWeightedGraph;
 import edu.princeton.cs.algs4.LazyPrimMST;
+import tileengine.TERenderer;
 import tileengine.TETile;
 import tileengine.Tileset;
 
 import java.util.*;
 
 public class World {
+    private final TERenderer ter = new TERenderer();
     private static final int TEN = 10;
     private static final int TWENTY = 20;
     private static final int FIFTEEN = 15;
+    private TETile groundTile = Tileset.GRASS;
+    private TETile wallTile = Tileset.WALL;
 
     private TETile[][] tiles;
     private int width;
@@ -24,6 +28,7 @@ public class World {
     private ArrayList<Integer> finalSorted;
     private LazyPrimMST pleaseWorkMST;
     private int roomCount;
+    private Avatar worldAvatar;
     public World(int width, int height, long inputSeed) {
         this.seed = inputSeed;
         this.width = width;
@@ -214,5 +219,52 @@ public class World {
                 //                }
             }
         }
+    }
+
+    public int[] getRandomGrassCoords() {
+        int[] returnArr = new int[2];
+        int x = r.nextInt(width);
+        int y = r.nextInt(height);
+        while (!(tiles[x][y] == groundTile)) {
+            x = r.nextInt(width);
+            y = r.nextInt(height);
+        }
+        returnArr[0] = x;
+        returnArr[1] = y;
+        return returnArr;
+    }
+
+    public void renderWorld() {
+        ter.renderFrame(tiles);
+    }
+
+    public TETile[][] getTilesCopy() {
+        TETile[][] returnTiles = new TETile[width][height];
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                returnTiles[x][y] = tiles[x][y];
+            }
+        }
+        return returnTiles;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public TETile getGroundTile() {
+        return this.groundTile;
+    }
+
+    public TETile getWallTile() {
+        return this.wallTile;
+    }
+
+    public long getSeed() {
+        return seed;
     }
 }

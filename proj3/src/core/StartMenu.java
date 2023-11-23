@@ -1,7 +1,7 @@
 package core;
 
 import edu.princeton.cs.algs4.StdDraw;
-import tileengine.TERenderer;
+import utils.FileUtils;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -13,6 +13,7 @@ public class StartMenu {
     private static final double POINT2 = 0.2;
     private static final int THIRTY = 30;
     private static final int TWENTY = 20;
+    private static final int FORTY = 40;
     private static final int FIFTY = 50;
     private static final int SIXTY = 60;
     private static final double POINT5 = 0.5;
@@ -23,12 +24,17 @@ public class StartMenu {
     private static final double POINT35 = 0.35;
     private static final double POINT05 = 0.05;
 
-    public static void startMenuInitializer() {
+    public StartMenu() {
+        startMenuInitializer();
+    }
+
+    public void startMenuInitializer() {
         startMenuDisplay();
         while (true) {
             if (StdDraw.isKeyPressed(KeyEvent.VK_N)) {
-                StdDraw.text(POINT5, POINT2, "CS61B: The Game");
                 inputMenu();
+            } else if (StdDraw.isKeyPressed(KeyEvent.VK_L)) {
+                loadMenu();
             }
         }
     }
@@ -45,8 +51,9 @@ public class StartMenu {
         StdDraw.text(POINT5, POINT4, "New Game (N)");
         StdDraw.text(POINT5, POINT35, "Load Game (L)");
         StdDraw.text(POINT5, POINT3, "Quit (Q)");
+        StdDraw.show();
     }
-    public static void inputMenu() {
+    public void inputMenu() {
         StdDraw.clear(Color.black);
         StdDraw.setPenColor(Color.white);
         Font bigFont = new Font(SANS_SERIF, PLAIN, THIRTY);
@@ -55,12 +62,16 @@ public class StartMenu {
         Font smallFont = new Font(SANS_SERIF, PLAIN, TWENTY);
         StdDraw.setFont(smallFont);
         StdDraw.text(POINT3, POINT4, "Seed: ");
+        inputAction();
+    }
+
+    public void inputAction() {
         double inputX = 0;
         String seed = "";
         while (true) {
             if (StdDraw.hasNextKeyTyped()) {
                 Character nextKey = StdDraw.nextKeyTyped();
-                if (Character.isDigit(nextKey)) {
+                if (Character.isDigit(nextKey)) { //makes sure to get a valid seed!
                     seed += nextKey;
                     String insert = String.valueOf(nextKey);
                     StdDraw.text(POINT3 + inputX, POINT2, insert);
@@ -79,19 +90,41 @@ public class StartMenu {
         } else {
             BigInteger seedToBigIntForCompare = new BigInteger(seed);
             if (seedToBigIntForCompare.compareTo(BigInteger.valueOf(Long.MAX_VALUE)) <= 0
-                && seedToBigIntForCompare.compareTo(BigInteger.valueOf(Long.MIN_VALUE)) >= 0) {
+                    && seedToBigIntForCompare.compareTo(BigInteger.valueOf(Long.MIN_VALUE)) >= 0) {
                 inputSeed = Long.parseLong(seed);
             } else {
                 inputSeed = testRandom.nextLong();
             }
         }
-        TERenderer ter = new TERenderer();
-        ter.initialize(SIXTY, FIFTY);
-        World testWorld = new World(SIXTY, FIFTY, inputSeed);
-        ter.renderFrame(testWorld.getTiles());
-
+        World testWorld = new World(SIXTY, FORTY, inputSeed);
+        PlayGame testGame = new PlayGame(testWorld);
+        testGame.runGame();
     }
-    public static void main(String[] args) {
-        startMenuInitializer();
+
+    public void loadMenu() {
+        if (FileUtils.fileExists("thisGame.txt")) {
+            String loadedGame = FileUtils.readFile("thisGame.txt");
+            char[] charArray = loadedGame.toCharArray();
+            String seed = "";
+            int index = 1;
+            if (charArray[0] == 'n' || charArray[0] == 'N') { //Single quotes for chars, double for strings!
+                while (index < charArray.length && (charArray[index] != 's' && charArray[index] != 'S')) {
+                    seed += charArray[index];
+                    index++;
+                }
+            }
+            long seedLong = Long.parseLong(seed);
+            World loadWorld = new World(SIXTY, FORTY, seedLong);
+            String loadedMoves = "";
+            for (int i = index; i < charArray.length; i++) {
+                loadedMoves += charArray[i];
+            }
+            PlayGame testLoadGame = new PlayGame(loadWorld, loadedMoves);
+            testLoadGame.runGame();
+        }
+    }
+
+    public void seedParse(int index, char[] charArray) {
+
     }
 }

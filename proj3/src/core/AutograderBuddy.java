@@ -2,6 +2,7 @@ package core;
 
 import tileengine.TETile;
 import tileengine.Tileset;
+import utils.FileUtils;
 
 import java.util.Random;
 
@@ -23,6 +24,62 @@ public class AutograderBuddy {
      * @return the 2D TETile[][] representing the state of the world
      */
     public static TETile[][] getWorldFromInput(String input) {
+        long seedLong = 0;
+        char[] parsedString = input.toCharArray();
+        if (parsedString[0] == 'n' || parsedString[0] == 'N') {
+            String newInput = getNewInput(input);
+            seedLong = inputToSeed(input);
+            World ourWorld = new World(SIXTY, THIRTY, seedLong);
+            PlayGame helperGame = new PlayGame(ourWorld, newInput);
+            quitAndSaveLocal(parsedString, helperGame);
+            return helperGame.getClonedTilesWithAvatar();
+        } else if (parsedString[0] == 'l' || parsedString[0] == 'L') {
+            if (FileUtils.fileExists("thisGame.txt")) {
+                String readFile = FileUtils.readFile("thisGame.txt");
+                String newInput = getNewInput(readFile) + getNewInput(input);
+                //need to add old AND new moves to same world
+                seedLong = inputToSeed(readFile);
+                World ourWorld = new World(SIXTY, THIRTY, seedLong);
+                PlayGame helperGame = new PlayGame(ourWorld, newInput);
+                quitAndSaveLocal(parsedString, helperGame);
+                return helperGame.getClonedTilesWithAvatar();
+            }
+        }
+        return null;
+    }
+
+    private static void quitAndSaveLocal(char[] parsedString, PlayGame helperGame) {
+        if (parsedString[parsedString.length - 2] == ':' && (parsedString[parsedString.length - 1] == 'q'
+                || parsedString[parsedString.length - 1] == 'Q')) {
+            FileUtils.writeFile("thisGame.txt", "n" + helperGame.getThisWorld().getSeed()
+                    + "s" + helperGame.getCurrWorldMoves());
+        }
+    }
+
+    /*
+    Returns the characters after seed input (N#S), AKA the moves. Stops at the first non-alphabetic AKA the : of :q.
+    */
+
+    private static String getNewInput(String input) { //MOVES
+        char[] readFileToArray = input.toCharArray();
+        String newInput = "";
+        int index = 1;
+        if (readFileToArray[0] == 'n' || readFileToArray[0] == 'N') { //Single quotes for chars, double for strings!
+            while (index < readFileToArray.length && (readFileToArray[index] != 's' && readFileToArray[index] != 'S')) {
+                index++;
+            }
+            index++; //moves on after the finishing S in (N#S)
+        } else if (readFileToArray[0] == 'l' || readFileToArray[0] == 'L') {
+            index = 1;
+        }
+        while (index < readFileToArray.length && Character.isAlphabetic(readFileToArray[index])) {
+            newInput += readFileToArray[index];
+            index++;
+        }
+        return newInput;
+    }
+
+    private static long inputToSeed(String input) { //SEED
         Random r = new Random();
         long seedLong;
         String stringBuild = "";
@@ -39,8 +96,7 @@ public class AutograderBuddy {
         } else {
             seedLong = Long.parseLong(stringBuild);
         }
-        World ourWorld = new World(SIXTY, THIRTY, seedLong);
-        return ourWorld.getTiles();
+        return seedLong;
     }
 
 

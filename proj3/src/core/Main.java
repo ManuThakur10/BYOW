@@ -7,7 +7,7 @@ public class Main {
     public static void main(String[] args) {
 
         //Initialize world
-        StartMenu.startMenuInitializer();
+        StartMenu newWorld = new StartMenu();
 
 
 
