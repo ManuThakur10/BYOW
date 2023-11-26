@@ -9,6 +9,7 @@ import java.awt.*;
 public class PlayGame {
     private final TERenderer ter = new TERenderer();
 
+
     private World thisWorld;
     private Avatar thisAvatar;
     private Movement thisMovement;
@@ -178,7 +179,15 @@ public class PlayGame {
     }
 
     public void quitAndSave() {
-        FileUtils.writeFile("thisGame.txt", "n" + thisWorld.getSeed() + "s" + currWorldMoves);
+        int helper = 0;
+        if (avatarTile == Tileset.AVATAR) {
+            helper += 1;
+        } else if (avatarTile == Tileset.AVATARCYAN) {
+            helper += 2;
+        } else if (avatarTile == Tileset.AVATARORANGE) {
+            helper += 3;
+        }
+        FileUtils.writeFile("thisGame.txt", helper + "n" + thisWorld.getSeed() + "s" + currWorldMoves);
         //looks like this overrides anything in the file so it works perfectly
         System.exit(0);
     }

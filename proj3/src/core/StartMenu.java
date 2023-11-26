@@ -31,7 +31,8 @@ public class StartMenu {
     private TETile avatarTile = Tileset.AVATAR;
     boolean quitOutOfAvatarMenu;
     boolean quitOutOfStartMenu;
-    int avatarMenuCircle = 1;
+    int avatarMenuCircle = 0;
+    //useful for determining whether to use loaded avatar tile or newly selected one
     private boolean toggle1;
     private boolean toggle2;
     private boolean toggle3;
@@ -124,12 +125,23 @@ public class StartMenu {
     }
 
     public void loadMenu() {
+        //boolean inAvatarMenu = false;
+        //boolean inGameMenu = false;
         if (FileUtils.fileExists("thisGame.txt")) {
             String loadedGame = FileUtils.readFile("thisGame.txt");
             char[] charArray = loadedGame.toCharArray();
             String seed = "";
-            int index = 1;
-            if (charArray[0] == 'n' || charArray[0] == 'N') { //Single quotes for chars, double for strings!
+            int index = 2;
+            if (avatarMenuCircle == 0) {
+                if (charArray[0] == '1') {
+                    avatarTile = Tileset.AVATAR;
+                } else if (charArray[0] == '2') {
+                    avatarTile = Tileset.AVATARCYAN;
+                } else if (charArray[0] == '3') {
+                    avatarTile = Tileset.AVATARORANGE;
+                }
+            }
+            if (charArray[1] == 'n' || charArray[1] == 'N') { //Single quotes for chars, double for strings!
                 while (index < charArray.length && (charArray[index] != 's' && charArray[index] != 'S')) {
                     seed += charArray[index];
                     index++;
@@ -166,7 +178,7 @@ public class StartMenu {
         while (!quitOutOfAvatarMenu) {
             textDrawer(avatarMenuCircle);
             if (StdDraw.hasNextKeyTyped()) {
-                Character nextKey = StdDraw.nextKeyTyped();
+                char nextKey = StdDraw.nextKeyTyped();
                 if (nextKey == '1') {
                     avatarTile = Tileset.AVATAR;
                     avatarMenuCircle = 1;
@@ -182,6 +194,10 @@ public class StartMenu {
                 }
             }
         }
+    }
+
+    public int getAvatarMenuCircle() {
+        return avatarMenuCircle;
     }
     public void textDrawer(int avatarMenuCircleInput) {
 
