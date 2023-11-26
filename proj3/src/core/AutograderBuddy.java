@@ -30,7 +30,7 @@ public class AutograderBuddy {
             String newInput = getNewInput(input);
             seedLong = inputToSeed(input);
             World ourWorld = new World(SIXTY, THIRTY, seedLong);
-            PlayGame helperGame = new PlayGame(ourWorld, newInput);
+            PlayGame helperGame = new PlayGame(ourWorld, newInput, Tileset.AVATAR);
             quitAndSaveLocal(parsedString, helperGame);
             return helperGame.getClonedTilesWithAvatar();
         } else if (parsedString[0] == 'l' || parsedString[0] == 'L') {
@@ -40,7 +40,7 @@ public class AutograderBuddy {
                 //need to add old AND new moves to same world
                 seedLong = inputToSeed(readFile);
                 World ourWorld = new World(SIXTY, THIRTY, seedLong);
-                PlayGame helperGame = new PlayGame(ourWorld, newInput);
+                PlayGame helperGame = new PlayGame(ourWorld, newInput, Tileset.AVATAR);
                 quitAndSaveLocal(parsedString, helperGame);
                 return helperGame.getClonedTilesWithAvatar();
             }

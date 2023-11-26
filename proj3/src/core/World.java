@@ -29,6 +29,8 @@ public class World {
     private LazyPrimMST pleaseWorkMST;
     private int roomCount;
     private Avatar worldAvatar;
+    private boolean createRE;
+    private TETile coinTile = Tileset.FLOWER;
     public World(int width, int height, long inputSeed) {
         this.seed = inputSeed;
         this.width = width;
@@ -44,6 +46,7 @@ public class World {
         r = new Random(seed);
         roomToCoords = new HashMap<>();
         finalSorted = new ArrayList<>();
+        createRE = false;
         roomCreator();
         roomSorter();
         hallCreator();
@@ -62,8 +65,8 @@ public class World {
     }
 
     public void generateRoom(int currX, int currY) {
-        int roomWidth = Math.abs(r.nextInt() % FIFTEEN) + 5; //Ensures room width of at least 3
-        int roomHeight = Math.abs(r.nextInt() % FIFTEEN) + 5; //Ensures room height of at least 3
+        int roomWidth = Math.abs(r.nextInt() % FIFTEEN) + 5; //Ensures room width of at least 5
+        int roomHeight = Math.abs(r.nextInt() % FIFTEEN) + 5; //Ensures room height of at least 5
         int maxX = Math.min((currX + roomWidth), width) - r.nextInt(3);
         int maxY = Math.min((currY + roomHeight), height) - r.nextInt(3);
         boolean testBool = true;
@@ -73,7 +76,7 @@ public class World {
                 break;
             }
         }
-        if (maxY - currY < 4 || maxX - currX < 4) { //gets rid of pure walls or halls (not a room)
+        if (maxY - currY < 4 || maxX - currX < 4) { //only rooms of at least width 5 are created
             testBool = false;
         }
         if (testBool) {
@@ -87,6 +90,12 @@ public class World {
                         tiles[i][d] = Tileset.GRASS;
                     }
                 }
+            }
+            if (!createRE) {
+                int reX = r.nextInt((maxX - 1) - (currX + 1)) + (currX + 1);
+                int reY = r.nextInt((maxY - 1) - (currY + 1)) + (currY + 1);
+                tiles[reX][reY] = coinTile;
+                createRE = true;
             }
             roomToCoords.put(roomCount, new int[6]);
             roomToCoords.get(roomCount)[0] = currX;
@@ -266,5 +275,15 @@ public class World {
 
     public long getSeed() {
         return seed;
+    }
+
+    public TETile getCoinTile() {
+        return coinTile;
+    }
+
+    public void setTile(TETile tile, int x, int y) {
+        if (x >= 0 && x < width && y >= 0 && y < height) {
+            tiles[x][y] = tile;
+        }
     }
 }

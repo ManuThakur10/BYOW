@@ -1,6 +1,7 @@
 package core;
 
 import tileengine.TETile;
+import tileengine.Tileset;
 
 public class Movement {
     private int WIDTH;
@@ -10,19 +11,29 @@ public class Movement {
     World world;
     TETile[][] worldArray;
     Avatar playerAvatar;
-    public Movement(int width, int gameHeight, World world, Avatar avatar) {
+    private TETile groundTile = Tileset.GRASS;
+    private TETile wallTile = Tileset.WALL;
+    private TETile coinTile = Tileset.FLOWER;
+    public Movement(int width, int gameHeight, TETile[][] worldArray, Avatar avatar) {
         this.WIDTH = width;
         this.GAME_HEIGHT = gameHeight;
-        this.world = world;
+        this.worldArray = worldArray;
         this.playerAvatar = avatar;
-
-        //        this.worldArray = world.getTiles();
-
     }
 
     public boolean canMove(int deltaX, int deltaY) {
-        worldArray = world.getTiles();
-        return worldArray[playerAvatar.getX() + deltaX][playerAvatar.getY() + deltaY] == world.getGroundTile();
+        if (worldArray[playerAvatar.getX() + deltaX][playerAvatar.getY() + deltaY] == groundTile
+                || worldArray[playerAvatar.getX() + deltaX][playerAvatar.getY() + deltaY] == coinTile) {
+            return true;
+        }
+        return false;
+    }
+    public void setGroundTile(TETile groundTile) {
+        this.groundTile = groundTile;
+    }
+
+    public void setCoinTile(TETile coinTile) {
+        this.coinTile = coinTile;
     }
 
     public void moveUp() {

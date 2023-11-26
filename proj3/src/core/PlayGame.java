@@ -5,7 +5,6 @@ import tileengine.TERenderer;
 import tileengine.TETile;
 import tileengine.Tileset;
 import utils.FileUtils;
-
 import java.awt.*;
 public class PlayGame {
     private final TERenderer ter = new TERenderer();
@@ -18,26 +17,42 @@ public class PlayGame {
     private long prevFrameTimestamp; //initialized to zero!
     private boolean isGameOver;
     private boolean readyToQuit;
+    private boolean lightBoxToggle;
     private String currWorldMoves;
+    private TETile avatarTile = Tileset.AVATAR;
+    private boolean openRE;
     private static final int SIXTEEN = 16;
-    public PlayGame(World thisWorld) {
+    RandomEncounter helperRE;
+    PlayRandomEncounter helperPlayRE;
+    public PlayGame(World thisWorld, TETile avatarTile) {
         this.thisWorld = thisWorld;
+        this.avatarTile = avatarTile;
         int[] randomGrassCoords = thisWorld.getRandomGrassCoords();
-        this.thisAvatar = new Avatar(randomGrassCoords[0], randomGrassCoords[1], Tileset.AVATAR);
-        this.thisMovement = new Movement(thisWorld.getWidth(), thisWorld.getHeight(), this.thisWorld, this.thisAvatar);
+        this.thisAvatar = new Avatar(randomGrassCoords[0], randomGrassCoords[1], avatarTile);
+        this.thisMovement = new Movement(thisWorld.getWidth(), thisWorld.getHeight(),
+                this.thisWorld.getTiles(), this.thisAvatar);
+        helperRE = new RandomEncounter(thisWorld.getWidth(), thisWorld.getHeight());
+        helperPlayRE = new PlayRandomEncounter(helperRE);
         currWorldMoves = "";
     }
 
-    public PlayGame(World thisWorld, String loadedGame) {
+    public PlayGame(World thisWorld, String loadedGame, TETile avatarTile) {
         this.thisWorld = thisWorld;
         int[] randomGrassCoords = thisWorld.getRandomGrassCoords(); //should still give same pseudorandom #s
-        this.thisAvatar = new Avatar(randomGrassCoords[0], randomGrassCoords[1], Tileset.AVATAR);
-        this.thisMovement = new Movement(thisWorld.getWidth(), thisWorld.getHeight(), this.thisWorld, this.thisAvatar);
+        this.avatarTile = avatarTile;
+        this.thisAvatar = new Avatar(randomGrassCoords[0], randomGrassCoords[1], avatarTile);
+        this.thisMovement = new Movement(thisWorld.getWidth(), thisWorld.getHeight(),
+                this.thisWorld.getTiles(), this.thisAvatar);
         currWorldMoves = loadedGame;
+        helperRE = new RandomEncounter(thisWorld.getWidth(), thisWorld.getHeight());
+        helperPlayRE = new PlayRandomEncounter(helperRE);
         loadedGameHelper(loadedGame);
         TETile[][] clonedTiles = thisWorld.getTilesCopy();
         clonedTiles[thisAvatar.getX()][thisAvatar.getY()] = thisAvatar.getAvatar();
         clonedTilesWithAvatar = clonedTiles;
+        lightBox();
+
+
 
     }
 
@@ -45,14 +60,16 @@ public class PlayGame {
         char[] loadedGameToArray = loadedGame.toCharArray();
         for (int a = 0; a < loadedGameToArray.length; a++) {
             char helper = loadedGameToArray[a];
-            if (helper == 'a') {
+            if (helper == 'a' || helper == 'A') {
                 thisMovement.moveLeft();
-            } else if (helper == 'd') {
+            } else if (helper == 'd' || helper == 'D') {
                 thisMovement.moveRight();
-            } else if (helper == 's') {
+            } else if (helper == 's' || helper == 'S') {
                 thisMovement.moveDown();
-            } else if (helper == 'w') {
+            } else if (helper == 'w' || helper == 'W') {
                 thisMovement.moveUp();
+            } else if (helper == 'r' || helper == 'R') {
+                lightBoxToggle = !lightBoxToggle;
             }
         }
     }
@@ -65,13 +82,52 @@ public class PlayGame {
         while (!isGameOver) {
             if (shouldRenderNewFrame()) {
                 updateGame();
+                lightBox();
                 renderBoard();
                 mouseHover();
+                if (openRE) {
+                    playRE();
+                    openRE = false;
+                }
+            }
+        }
+    }
+
+    private void playRE() {
+        helperPlayRE.runGame();
+    }
+
+    public void lightBox() {
+        int maxX = Math.min(getAvatar().getX() + 3, getThisWorld().getWidth() - 1);
+        int minX = Math.max(getAvatar().getX() - 3, 0);
+        int maxY = Math.min(getAvatar().getY() + 3, getThisWorld().getHeight() - 1);
+        int minY = Math.max(getAvatar().getY() - 3, 0);
+        if (lightBoxToggle) {
+            for (int x1 = 0; x1 < minX; x1++) {
+                for (int y1 = 0; y1 < getThisWorld().getHeight(); y1++) {
+                    clonedTilesWithAvatar[x1][y1] = Tileset.NOTHING;
+                }
+            }
+            for (int x2 = maxX; x2 < getThisWorld().getWidth(); x2++) {
+                for (int y1 = 0; y1 < getThisWorld().getHeight(); y1++) {
+                    clonedTilesWithAvatar[x2][y1] = Tileset.NOTHING;
+                }
+            }
+            for (int y2 = 0; y2 < minY; y2++) {
+                for (int x3 = 0; x3 < getThisWorld().getWidth(); x3++) {
+                    clonedTilesWithAvatar[x3][y2] = Tileset.NOTHING;
+                }
+            }
+            for (int y2 = maxY; y2 < getThisWorld().getHeight(); y2++) {
+                for (int x3 = 0; x3 < getThisWorld().getWidth(); x3++) {
+                    clonedTilesWithAvatar[x3][y2] = Tileset.NOTHING;
+                }
             }
         }
     }
 
     public void renderBoard() {
+        //CALL LIGHTBOX()
         ter.renderFrame(clonedTilesWithAvatar);
     }
 
@@ -81,24 +137,27 @@ public class PlayGame {
             if ((helper == 'q' || helper == 'Q') && readyToQuit) {
                 isGameOver = true;
                 quitAndSave();
-            } else if (helper == 'a') {
+            } else if (helper == 'a' || helper == 'A') {
                 currWorldMoves += 'a';
                 thisMovement.moveLeft();
                 readyToQuit = false;
-            } else if (helper == 'd') {
+            } else if (helper == 'd' || helper == 'D') {
                 currWorldMoves += 'd';
                 thisMovement.moveRight();
                 readyToQuit = false;
-            } else if (helper == 's') {
+            } else if (helper == 's' || helper == 'S') {
                 currWorldMoves += 's';
                 thisMovement.moveDown();
                 readyToQuit = false;
-            } else if (helper == 'w') {
+            } else if (helper == 'w' || helper == 'W') {
                 currWorldMoves += 'w';
                 thisMovement.moveUp();
                 readyToQuit = false;
             } else if (helper == ':') {
                 readyToQuit = true;
+            } else if (helper == 'r' || helper == 'R') {
+                currWorldMoves += 'r';
+                lightBoxToggle = !lightBoxToggle;
             } else {
                 readyToQuit = false;
             }
@@ -106,8 +165,16 @@ public class PlayGame {
         TETile[][] clonedTiles = thisWorld.getTilesCopy();
         //.clone() results in a shallow copy, which for some reason keeps previous positions
         // of the character. I don't know why, though.
+        reChecker();
         clonedTiles[thisAvatar.getX()][thisAvatar.getY()] = thisAvatar.getAvatar();
         clonedTilesWithAvatar = clonedTiles;
+    }
+
+    public void reChecker() {
+        if (thisWorld.getTiles()[thisAvatar.getX()][thisAvatar.getY()] == thisWorld.getCoinTile()) {
+            thisWorld.setTile(thisWorld.getGroundTile(), thisAvatar.getX(), thisAvatar.getY());
+            openRE = true;
+        }
     }
 
     public void quitAndSave() {
