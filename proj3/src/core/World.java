@@ -91,12 +91,12 @@ public class World {
                     }
                 }
             }
-            if (!createRE) {
-                int reX = r.nextInt((maxX - 1) - (currX + 1)) + (currX + 1);
-                int reY = r.nextInt((maxY - 1) - (currY + 1)) + (currY + 1);
-                tiles[reX][reY] = coinTile;
-                createRE = true;
-            }
+            //            if (!createRE) {
+            //                int reX = r.nextInt((maxX - 1) - (currX + 1)) + (currX + 1);
+            //                int reY = r.nextInt((maxY - 1) - (currY + 1)) + (currY + 1);
+            //                tiles[reX][reY] = coinTile;
+            //                createRE = true;
+            //            }
             roomToCoords.put(roomCount, new int[6]);
             roomToCoords.get(roomCount)[0] = currX;
             roomToCoords.get(roomCount)[1] = currY;
